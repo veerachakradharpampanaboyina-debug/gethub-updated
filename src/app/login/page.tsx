@@ -1,6 +1,6 @@
-
 'use client';
 
+import { Suspense, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,10 +15,10 @@ import { Label } from '@/components/ui/label';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import GethubLogo from '@/components/gethub-logo';
 
-function LoginPage() {
+// This component uses useSearchParams and needs to be wrapped in Suspense
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,6 @@ function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/dashboard';
-
 
   useEffect(() => {
     if (!loading && user) {
@@ -68,7 +67,6 @@ function LoginPage() {
       setError(err.message);
     }
   };
-
 
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
@@ -147,10 +145,20 @@ function LoginPage() {
   );
 }
 
-export default function LoginPageWrapper() {
+// Main page component with Suspense boundary
+export default function LoginPage() {
   return (
     <AuthProvider>
-      <LoginPage />
+      <Suspense fallback={
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading login form...</p>
+          </div>
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
     </AuthProvider>
   );
 }
